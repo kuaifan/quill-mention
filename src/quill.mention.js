@@ -4,7 +4,8 @@ import {
   attachDataValues,
   getMentionCharIndex,
   hasValidChars,
-  hasValidMentionCharIndex
+  hasValidMentionCharIndex,
+  cloneJSON
 } from "./utils";
 import "./quill.mention.css";
 import "./blots/mention";
@@ -572,7 +573,8 @@ class Mention {
     this.mentionContainer.style.position = "fixed";
     this.mentionContainer.style.height = null;
 
-    const containerPos = this.quill.container.getBoundingClientRect();
+    const containerPos = cloneJSON(this.quill.container.getBoundingClientRect());
+    containerPos.top += window.scrollY;
     const mentionCharPos = this.quill.getBounds(this.mentionCharPos);
     const mentionCharPosAbsolute = {
       left: containerPos.left + mentionCharPos.left,

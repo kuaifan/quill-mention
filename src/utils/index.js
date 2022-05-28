@@ -47,9 +47,17 @@ function hasValidMentionCharIndex(mentionCharIndex, text, isolateChar) {
   return false;
 }
 
+function cloneJSON(myObj) {
+  if (typeof myObj !== "object") return myObj;
+  if (myObj === null) return myObj;
+  //
+  return JSON.parse(JSON.stringify(myObj));
+}
+
 export {
   attachDataValues,
   getMentionCharIndex,
   hasValidChars,
-  hasValidMentionCharIndex
+  hasValidMentionCharIndex,
+  cloneJSON
 };
