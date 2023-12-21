@@ -32,11 +32,13 @@ class MentionBlot extends Embed {
   }
 
   static setDataValues(element, data) {
-    if (MentionBlot.isAndroid()) {
-      setTimeout(() => {
+    setTimeout(() => {
+      if (MentionBlot.isAndroid()) {
         element.getElementsByTagName("span")[0].setAttribute("contenteditable", "inherit");
-      }, 0);
-    }
+      } else {
+        element.getElementsByTagName("span")[0].parentNode.setAttribute("contenteditable", "false");
+      }
+    }, 0);
 
     const domNode = element;
     Object.keys(data).forEach(key => {
@@ -61,12 +63,23 @@ class MentionBlot extends Embed {
         setTimeout(() => this.remove(), 0);
         return;
       }
+    } else {
+      mutations.forEach(mutation => {
+        if (
+            mutation.type === 'characterData' &&
+            (mutation.target === this.leftGuard ||
+                mutation.target === this.rightGuard)
+        ) {
+          const range = this.restore(mutation.target);
+          if (range) context.range = range;
+        }
+      })
     }
   }
 
   attach() {
     super.attach();
-  
+
     if (!this.mounted) {
       this.mounted = true;
       this.clickHandler = this.getClickHandler();
