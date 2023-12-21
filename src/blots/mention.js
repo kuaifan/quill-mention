@@ -35,7 +35,7 @@ class MentionBlot extends Embed {
     setTimeout(() => {
       if (MentionBlot.isAndroid()) {
         element.getElementsByTagName("span")[0].setAttribute("contenteditable", "inherit");
-      } else {
+      } else if (MentionBlot.isChrome()) {
         element.getElementsByTagName("span")[0].parentNode.setAttribute("contenteditable", "false");
       }
     }, 0);
@@ -54,6 +54,11 @@ class MentionBlot extends Embed {
   static isAndroid() {
     let ua = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase();
     return ua && ua.indexOf('android') > 0;
+  }
+
+  static isChrome() {
+    let ua = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase();
+    return (ua.match(/Chrome/i) + '' === 'chrome');
   }
 
   update(mutations, context) {
