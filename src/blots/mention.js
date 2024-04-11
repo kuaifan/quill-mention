@@ -17,19 +17,30 @@ class MentionBlot extends Embed {
 
     const denotationChar = document.createElement("span");
     denotationChar.className = "ql-mention-denotation-char";
-    denotationChar.innerText = data.denotationChar;
+    denotationChar.innerHTML = data.denotationChar;
     node.appendChild(denotationChar);
+    node.innerHTML += data.value;
 
-    if (typeof this.render === 'function') {
-      node.appendChild(this.render(data));
-    } else {
-      node.innerText += data.value;
+    if (MentionBlot.isAndroid()) {
+      const AndroidBackspaceFix = document.createElement("span");
+      AndroidBackspaceFix.innerHTML = "&nbsp;";
+      // it needs to be "visible" in order to work - so limit to minimal size.
+      AndroidBackspaceFix.setAttribute("style", "display: inline-block; height: 1px; width: 1px; overflow: hidden; ");
+      node.appendChild(AndroidBackspaceFix)
     }
 
     return MentionBlot.setDataValues(node, data);
   }
 
   static setDataValues(element, data) {
+    setTimeout(() => {
+      if (MentionBlot.isAndroid()) {
+        element.getElementsByTagName("span")[0].setAttribute("contenteditable", "inherit");
+      } else if (MentionBlot.isChrome()) {
+        element.getElementsByTagName("span")[0].parentNode.setAttribute("contenteditable", "false");
+      }
+    }, 0);
+
     const domNode = element;
     Object.keys(data).forEach(key => {
       domNode.dataset[key] = data[key];
@@ -39,6 +50,37 @@ class MentionBlot extends Embed {
 
   static value(domNode) {
     return domNode.dataset;
+  }
+
+  static isAndroid() {
+    let ua = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase();
+    return ua && ua.indexOf('android') > 0;
+  }
+
+  static isChrome() {
+    let ua = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase();
+    return (ua.match(/Chrome/i) + '' === 'chrome');
+  }
+
+  update(mutations, context) {
+    if (MentionBlot.isAndroid()) {
+      for (const mutation of mutations) {
+        if (mutation.type === "attributes" && mutation.attributeName === "contenteditable") continue;
+        setTimeout(() => this.remove(), 0);
+        return;
+      }
+    } else {
+      mutations.forEach(mutation => {
+        if (
+            mutation.type === 'characterData' &&
+            (mutation.target === this.leftGuard ||
+                mutation.target === this.rightGuard)
+        ) {
+          const range = this.restore(mutation.target);
+          if (range) context.range = range;
+        }
+      })
+    }
   }
 
   attach() {

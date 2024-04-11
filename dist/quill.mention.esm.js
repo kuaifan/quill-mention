@@ -171,6 +171,70 @@ function _get() {
   }
   return _get.apply(this, arguments);
 }
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+  return arr2;
+}
+function _createForOfIteratorHelper(o, allowArrayLike) {
+  var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+  if (!it) {
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+      var F = function () {};
+      return {
+        s: F,
+        n: function () {
+          if (i >= o.length) return {
+            done: true
+          };
+          return {
+            done: false,
+            value: o[i++]
+          };
+        },
+        e: function (e) {
+          throw e;
+        },
+        f: F
+      };
+    }
+    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  var normalCompletion = true,
+    didErr = false,
+    err;
+  return {
+    s: function () {
+      it = it.call(o);
+    },
+    n: function () {
+      var step = it.next();
+      normalCompletion = step.done;
+      return step;
+    },
+    e: function (e) {
+      didErr = true;
+      err = e;
+    },
+    f: function () {
+      try {
+        if (!normalCompletion && it.return != null) it.return();
+      } finally {
+        if (didErr) throw err;
+      }
+    }
+  };
+}
 function _toPrimitive(input, hint) {
   if (typeof input !== "object" || input === null) return input;
   var prim = input[Symbol.toPrimitive];
@@ -253,6 +317,12 @@ function hasValidMentionCharIndex(mentionCharIndex, text, isolateChar, textPrefi
   var mentionPrefix = mentionCharIndex ? text[mentionCharIndex - 1] : textPrefix;
   return !mentionPrefix || !!mentionPrefix.match(/\s/);
 }
+function cloneJSON(myObj) {
+  if (_typeof(myObj) !== "object") return myObj;
+  if (myObj === null) return myObj;
+  //
+  return JSON.parse(JSON.stringify(myObj));
+}
 
 var Embed = Quill["import"]("blots/embed");
 var MentionBlot = /*#__PURE__*/function (_Embed) {
@@ -270,6 +340,36 @@ var MentionBlot = /*#__PURE__*/function (_Embed) {
     return _this;
   }
   _createClass(MentionBlot, [{
+    key: "update",
+    value: function update(mutations, context) {
+      var _this2 = this;
+      if (MentionBlot.isAndroid()) {
+        var _iterator = _createForOfIteratorHelper(mutations),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var mutation = _step.value;
+            if (mutation.type === "attributes" && mutation.attributeName === "contenteditable") continue;
+            setTimeout(function () {
+              return _this2.remove();
+            }, 0);
+            return;
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      } else {
+        mutations.forEach(function (mutation) {
+          if (mutation.type === 'characterData' && (mutation.target === _this2.leftGuard || mutation.target === _this2.rightGuard)) {
+            var range = _this2.restore(mutation.target);
+            if (range) context.range = range;
+          }
+        });
+      }
+    }
+  }, {
     key: "attach",
     value: function attach() {
       _get(_getPrototypeOf(MentionBlot.prototype), "attach", this).call(this);
@@ -294,9 +394,9 @@ var MentionBlot = /*#__PURE__*/function (_Embed) {
   }, {
     key: "getClickHandler",
     value: function getClickHandler() {
-      var _this2 = this;
+      var _this3 = this;
       return function (e) {
-        var event = _this2.buildEvent("mention-clicked", e);
+        var event = _this3.buildEvent("mention-clicked", e);
         window.dispatchEvent(event);
         e.preventDefault();
       };
@@ -304,9 +404,9 @@ var MentionBlot = /*#__PURE__*/function (_Embed) {
   }, {
     key: "getHoverHandler",
     value: function getHoverHandler() {
-      var _this3 = this;
+      var _this4 = this;
       return function (e) {
-        var event = _this3.buildEvent('mention-hovered', e);
+        var event = _this4.buildEvent('mention-hovered', e);
         window.dispatchEvent(event);
         e.preventDefault();
       };
@@ -328,18 +428,28 @@ var MentionBlot = /*#__PURE__*/function (_Embed) {
       var node = _get(_getPrototypeOf(MentionBlot), "create", this).call(this);
       var denotationChar = document.createElement("span");
       denotationChar.className = "ql-mention-denotation-char";
-      denotationChar.innerText = data.denotationChar;
+      denotationChar.innerHTML = data.denotationChar;
       node.appendChild(denotationChar);
-      if (typeof this.render === 'function') {
-        node.appendChild(this.render(data));
-      } else {
-        node.innerText += data.value;
+      node.innerHTML += data.value;
+      if (MentionBlot.isAndroid()) {
+        var AndroidBackspaceFix = document.createElement("span");
+        AndroidBackspaceFix.innerHTML = "&nbsp;";
+        // it needs to be "visible" in order to work - so limit to minimal size.
+        AndroidBackspaceFix.setAttribute("style", "display: inline-block; height: 1px; width: 1px; overflow: hidden; ");
+        node.appendChild(AndroidBackspaceFix);
       }
       return MentionBlot.setDataValues(node, data);
     }
   }, {
     key: "setDataValues",
     value: function setDataValues(element, data) {
+      setTimeout(function () {
+        if (MentionBlot.isAndroid()) {
+          element.getElementsByTagName("span")[0].setAttribute("contenteditable", "inherit");
+        } else if (MentionBlot.isChrome()) {
+          element.getElementsByTagName("span")[0].parentNode.setAttribute("contenteditable", "false");
+        }
+      }, 0);
       var domNode = element;
       Object.keys(data).forEach(function (key) {
         domNode.dataset[key] = data[key];
@@ -350,6 +460,18 @@ var MentionBlot = /*#__PURE__*/function (_Embed) {
     key: "value",
     value: function value(domNode) {
       return domNode.dataset;
+    }
+  }, {
+    key: "isAndroid",
+    value: function isAndroid() {
+      var ua = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase();
+      return ua && ua.indexOf('android') > 0;
+    }
+  }, {
+    key: "isChrome",
+    value: function isChrome() {
+      var ua = typeof window !== 'undefined' && window.navigator.userAgent.toLowerCase();
+      return ua.match(/Chrome/i) + '' === 'chrome';
     }
   }]);
   return MentionBlot;
@@ -387,7 +509,7 @@ var Mention = /*#__PURE__*/function () {
       onSelect: function onSelect(item, insertItem) {
         insertItem(item);
       },
-      mentionDenotationChars: ['@'],
+      mentionDenotationChars: ["@"],
       showDenotationChar: true,
       allowedChars: /^[a-zA-Z0-9_]*$/,
       minChars: 0,
@@ -397,11 +519,11 @@ var Mention = /*#__PURE__*/function () {
       isolateCharacter: false,
       allowInlineMentionChar: false,
       fixMentionsToQuill: false,
-      positioningStrategy: 'normal',
-      defaultMenuOrientation: 'bottom',
-      blotName: 'mention',
-      dataAttributes: ['id', 'value', 'denotationChar', 'link', 'target', 'disabled'],
-      linkTarget: '_blank',
+      positioningStrategy: "normal",
+      defaultMenuOrientation: "bottom",
+      blotName: "mention",
+      dataAttributes: ["id", "value", "denotationChar", "link", "target", "disabled"],
+      linkTarget: "_blank",
       onOpen: function onOpen() {
         return true;
       },
@@ -412,9 +534,9 @@ var Mention = /*#__PURE__*/function () {
         return true;
       },
       // Style options
-      listItemClass: 'ql-mention-list-item',
-      mentionContainerClass: 'ql-mention-list-container',
-      mentionListClass: 'ql-mention-list',
+      listItemClass: "ql-mention-list-item",
+      mentionContainerClass: "ql-mention-list-container",
+      mentionListClass: "ql-mention-list",
       spaceAfterInsert: true,
       selectKeys: [Keys.ENTER]
     };
@@ -424,30 +546,30 @@ var Mention = /*#__PURE__*/function () {
 
     //Bind all option-functions so they have a reasonable context
     for (var o in this.options) {
-      if (typeof this.options[o] === 'function') {
+      if (typeof this.options[o] === "function") {
         this.options[o] = this.options[o].bind(this);
       }
     }
 
     //create mention container
-    this.mentionContainer = document.createElement('div');
-    this.mentionContainer.className = this.options.mentionContainerClass ? this.options.mentionContainerClass : '';
-    this.mentionContainer.style.cssText = 'display: none; position: absolute;';
+    this.mentionContainer = document.createElement("div");
+    this.mentionContainer.className = this.options.mentionContainerClass ? this.options.mentionContainerClass : "";
+    this.mentionContainer.style.cssText = "display: none; position: absolute;";
     this.mentionContainer.onmousemove = this.onContainerMouseMove.bind(this);
     if (this.options.fixMentionsToQuill) {
-      this.mentionContainer.style.width = 'auto';
+      this.mentionContainer.style.width = "auto";
     }
-    this.mentionList = document.createElement('ul');
-    this.mentionList.id = 'quill-mention-list';
-    quill.root.setAttribute('aria-owns', 'quill-mention-list');
-    this.mentionList.className = this.options.mentionListClass ? this.options.mentionListClass : '';
+    this.mentionList = document.createElement("ul");
+    this.mentionList.id = "quill-mention-list";
+    quill.root.setAttribute("aria-owns", "quill-mention-list");
+    this.mentionList.className = this.options.mentionListClass ? this.options.mentionListClass : "";
     this.mentionContainer.appendChild(this.mentionList);
-    quill.on('text-change', this.onTextChange.bind(this));
-    quill.on('selection-change', this.onSelectionChange.bind(this));
+    quill.on("text-change", this.onTextChange.bind(this));
+    quill.on("selection-change", this.onSelectionChange.bind(this));
 
     //Pasting doesn't fire selection-change after the pasted text is
     //inserted, so here we manually trigger one
-    quill.container.addEventListener('paste', function () {
+    quill.container.addEventListener("paste", function () {
       setTimeout(function () {
         var range = quill.getSelection();
         _this.onSelectionChange(range);
@@ -513,13 +635,13 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "showMentionList",
     value: function showMentionList() {
-      if (this.options.positioningStrategy === 'fixed') {
+      if (this.options.positioningStrategy === "fixed") {
         document.body.appendChild(this.mentionContainer);
       } else {
         this.quill.container.appendChild(this.mentionContainer);
       }
-      this.mentionContainer.style.visibility = 'hidden';
-      this.mentionContainer.style.display = '';
+      this.mentionContainer.style.visibility = "hidden";
+      this.mentionContainer.style.display = "";
       this.mentionContainer.scrollTop = 0;
       this.setMentionContainerPosition();
       this.setIsOpen(true);
@@ -528,23 +650,23 @@ var Mention = /*#__PURE__*/function () {
     key: "hideMentionList",
     value: function hideMentionList() {
       this.options.onBeforeClose();
-      this.mentionContainer.style.display = 'none';
+      this.mentionContainer.style.display = "none";
       this.mentionContainer.remove();
       this.setIsOpen(false);
-      this.quill.root.removeAttribute('aria-activedescendant');
+      this.quill.root.removeAttribute("aria-activedescendant");
     }
   }, {
     key: "highlightItem",
     value: function highlightItem() {
       var scrollItemInView = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       for (var i = 0; i < this.mentionList.childNodes.length; i += 1) {
-        this.mentionList.childNodes[i].classList.remove('selected');
+        this.mentionList.childNodes[i].classList.remove("selected");
       }
-      if (this.itemIndex === -1 || this.mentionList.childNodes[this.itemIndex].dataset.disabled === 'true') {
+      if (this.itemIndex === -1 || this.mentionList.childNodes[this.itemIndex].dataset.disabled === "true") {
         return;
       }
-      this.mentionList.childNodes[this.itemIndex].classList.add('selected');
-      this.quill.root.setAttribute('aria-activedescendant', this.mentionList.childNodes[this.itemIndex].id);
+      this.mentionList.childNodes[this.itemIndex].classList.add("selected");
+      this.quill.root.setAttribute("aria-activedescendant", this.mentionList.childNodes[this.itemIndex].id);
       if (scrollItemInView) {
         var itemHeight = this.mentionList.childNodes[this.itemIndex].offsetHeight;
         var itemPos = this.mentionList.childNodes[this.itemIndex].offsetTop;
@@ -592,7 +714,7 @@ var Mention = /*#__PURE__*/function () {
       }
       var options = _objectSpread2(_objectSpread2({}, this.options), overriddenOptions);
       if (!options.showDenotationChar) {
-        render.denotationChar = '';
+        render.denotationChar = "";
       }
       var insertAtPos;
       if (!programmaticInsert) {
@@ -603,7 +725,7 @@ var Mention = /*#__PURE__*/function () {
       }
       var delta = this.quill.insertEmbed(insertAtPos, options.blotName, render, Quill.sources.USER);
       if (options.spaceAfterInsert) {
-        this.quill.insertText(insertAtPos + 1, ' ', Quill.sources.USER);
+        this.quill.insertText(insertAtPos + 1, " ", Quill.sources.USER);
         // setSelection here sets cursor position
         this.quill.setSelection(insertAtPos + 2, Quill.sources.USER);
       } else {
@@ -658,13 +780,13 @@ var Mention = /*#__PURE__*/function () {
       if (!renderedLoading) {
         return;
       }
-      if (this.mentionContainer.getElementsByClassName('ql-mention-loading').length > 0) {
+      if (this.mentionContainer.getElementsByClassName("ql-mention-loading").length > 0) {
         this.showMentionList();
         return;
       }
-      this.mentionList.innerHTML = '';
-      var loadingDiv = document.createElement('div');
-      loadingDiv.className = 'ql-mention-loading';
+      this.mentionList.innerHTML = "";
+      var loadingDiv = document.createElement("div");
+      loadingDiv.className = "ql-mention-loading";
       setInnerContent(loadingDiv, this.options.renderLoading());
       this.mentionContainer.append(loadingDiv);
       this.showMentionList();
@@ -672,7 +794,7 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "removeLoading",
     value: function removeLoading() {
-      var loadingDiv = this.mentionContainer.getElementsByClassName('ql-mention-loading');
+      var loadingDiv = this.mentionContainer.getElementsByClassName("ql-mention-loading");
       if (loadingDiv.length > 0) {
         loadingDiv[0].remove();
       }
@@ -683,15 +805,15 @@ var Mention = /*#__PURE__*/function () {
       if (data && data.length > 0) {
         this.removeLoading();
         this.values = data;
-        this.mentionList.innerText = '';
+        this.mentionList.innerText = "";
         var initialSelection = -1;
         for (var i = 0; i < data.length; i += 1) {
-          var li = document.createElement('li');
-          li.id = 'quill-mention-item-' + i;
-          li.className = this.options.listItemClass ? this.options.listItemClass : '';
+          var li = document.createElement("li");
+          li.id = "quill-mention-item-" + i;
+          li.className = this.options.listItemClass ? this.options.listItemClass : "";
           if (data[i].disabled) {
-            li.className += ' disabled';
-            li.setAttribute('aria-hidden', 'true');
+            li.className += " disabled";
+            li.setAttribute("aria-hidden", "true");
           } else if (initialSelection === -1) initialSelection = i;
           li.dataset.index = i;
           var renderedItem = this.options.renderItem(data[i], searchTerm);
@@ -717,7 +839,7 @@ var Mention = /*#__PURE__*/function () {
       do {
         increment++;
         newIndex = (this.itemIndex + increment) % this.values.length;
-        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === 'true';
+        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === "true";
         if (increment === this.values.length + 1) {
           //we've wrapped around w/o finding an enabled item
           newIndex = -1;
@@ -736,7 +858,7 @@ var Mention = /*#__PURE__*/function () {
       do {
         decrement++;
         newIndex = (this.itemIndex + this.values.length - decrement) % this.values.length;
-        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === 'true';
+        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === "true";
         if (decrement === this.values.length + 1) {
           //we've wrapped around w/o finding an enabled item
           newIndex = -1;
@@ -772,7 +894,7 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "setMentionContainerPosition",
     value: function setMentionContainerPosition() {
-      if (this.options.positioningStrategy === 'fixed') this.setMentionContainerPosition_Fixed();else this.setMentionContainerPosition_Normal();
+      if (this.options.positioningStrategy === "fixed") this.setMentionContainerPosition_Fixed();else this.setMentionContainerPosition_Normal();
     }
   }, {
     key: "setMentionContainerPosition_Normal",
@@ -796,7 +918,7 @@ var Mention = /*#__PURE__*/function () {
       }
 
       // handle vertical positioning
-      if (this.options.defaultMenuOrientation === 'top') {
+      if (this.options.defaultMenuOrientation === "top") {
         // Attempt to align the mention container with the top of the quill editor
         if (this.options.fixMentionsToQuill) topPos = -1 * (containerHeight + this.options.offsetTop);else topPos = mentionCharPos.top - (containerHeight + this.options.offsetTop);
 
@@ -824,27 +946,28 @@ var Mention = /*#__PURE__*/function () {
         }
       }
       if (topPos >= 0) {
-        this.options.mentionContainerClass.split(' ').forEach(function (className) {
+        this.options.mentionContainerClass.split(" ").forEach(function (className) {
           _this3.mentionContainer.classList.add("".concat(className, "-bottom"));
           _this3.mentionContainer.classList.remove("".concat(className, "-top"));
         });
       } else {
-        this.options.mentionContainerClass.split(' ').forEach(function (className) {
+        this.options.mentionContainerClass.split(" ").forEach(function (className) {
           _this3.mentionContainer.classList.add("".concat(className, "-top"));
           _this3.mentionContainer.classList.remove("".concat(className, "-bottom"));
         });
       }
       this.mentionContainer.style.top = "".concat(topPos, "px");
       this.mentionContainer.style.left = "".concat(leftPos, "px");
-      this.mentionContainer.style.visibility = 'visible';
+      this.mentionContainer.style.visibility = "visible";
     }
   }, {
     key: "setMentionContainerPosition_Fixed",
     value: function setMentionContainerPosition_Fixed() {
       var _this4 = this;
-      this.mentionContainer.style.position = 'fixed';
+      this.mentionContainer.style.position = "fixed";
       this.mentionContainer.style.height = null;
-      var containerPos = this.quill.container.getBoundingClientRect();
+      var containerPos = cloneJSON(this.quill.container.getBoundingClientRect());
+      containerPos.top += window.scrollY;
       var mentionCharPos = this.quill.getBounds(this.mentionCharPos);
       var mentionCharPosAbsolute = {
         left: containerPos.left + mentionCharPos.left,
@@ -875,22 +998,22 @@ var Mention = /*#__PURE__*/function () {
       var fitsBottom = this.mentionContainer.offsetHeight <= availableSpaceBottom;
       var fitsTop = this.mentionContainer.offsetHeight <= availableSpaceTop;
       var placement;
-      if (this.options.defaultMenuOrientation === 'top' && fitsTop) {
-        placement = 'top';
-      } else if (this.options.defaultMenuOrientation === 'bottom' && fitsBottom) {
-        placement = 'bottom';
+      if (this.options.defaultMenuOrientation === "top" && fitsTop) {
+        placement = "top";
+      } else if (this.options.defaultMenuOrientation === "bottom" && fitsBottom) {
+        placement = "bottom";
       } else {
         //it doesnt fit either so put it where there's the most space
-        placement = availableSpaceBottom > availableSpaceTop ? 'bottom' : 'top';
+        placement = availableSpaceBottom > availableSpaceTop ? "bottom" : "top";
       }
-      if (placement === 'bottom') {
+      if (placement === "bottom") {
         topPos = relativeToPos.top + relativeToPos.height;
         if (!fitsBottom) {
           //shrink it to fit
           //3 is a bit of a fudge factor so it doesnt touch the edge of the screen
-          this.mentionContainer.style.height = availableSpaceBottom - 3 + 'px';
+          this.mentionContainer.style.height = availableSpaceBottom - 3 + "px";
         }
-        this.options.mentionContainerClass.split(' ').forEach(function (className) {
+        this.options.mentionContainerClass.split(" ").forEach(function (className) {
           _this4.mentionContainer.classList.add("".concat(className, "-bottom"));
           _this4.mentionContainer.classList.remove("".concat(className, "-top"));
         });
@@ -899,17 +1022,17 @@ var Mention = /*#__PURE__*/function () {
         if (!fitsTop) {
           //shrink it to fit
           //3 is a bit of a fudge factor so it doesnt touch the edge of the screen
-          this.mentionContainer.style.height = availableSpaceTop - 3 + 'px';
+          this.mentionContainer.style.height = availableSpaceTop - 3 + "px";
           topPos = 3;
         }
-        this.options.mentionContainerClass.split(' ').forEach(function (className) {
+        this.options.mentionContainerClass.split(" ").forEach(function (className) {
           _this4.mentionContainer.classList.add("".concat(className, "-top"));
           _this4.mentionContainer.classList.remove("".concat(className, "-bottom"));
         });
       }
       this.mentionContainer.style.top = "".concat(topPos, "px");
       this.mentionContainer.style.left = "".concat(leftPos, "px");
-      this.mentionContainer.style.visibility = 'visible';
+      this.mentionContainer.style.visibility = "visible";
     }
   }, {
     key: "getTextBeforeCursor",
@@ -927,7 +1050,7 @@ var Mention = /*#__PURE__*/function () {
       this.cursorPos = range.index;
       var textBeforeCursor = this.getTextBeforeCursor();
       var textOffset = Math.max(0, this.cursorPos - this.options.maxChars);
-      var textPrefix = textOffset ? this.quill.getText(textOffset - 1, textOffset) : '';
+      var textPrefix = textOffset ? this.quill.getText(textOffset - 1, textOffset) : "";
       var _getMentionCharIndex = getMentionCharIndex(textBeforeCursor, this.options.mentionDenotationChars, this.options.isolateCharacter, this.options.allowInlineMentionChar),
         mentionChar = _getMentionCharIndex.mentionChar,
         mentionCharIndex = _getMentionCharIndex.mentionCharIndex;
@@ -976,7 +1099,7 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "onTextChange",
     value: function onTextChange(delta, oldDelta, source) {
-      if (source === 'user') {
+      if (source === "user") {
         setTimeout(this.onSomethingChange.bind(this), 50);
       }
     }
@@ -1000,6 +1123,6 @@ var Mention = /*#__PURE__*/function () {
   }]);
   return Mention;
 }();
-Quill.register('modules/mention', Mention);
+Quill.register("modules/mention", Mention);
 
 export { Mention as default };

@@ -5,7 +5,8 @@ import {
   getMentionCharIndex,
   hasValidChars,
   hasValidMentionCharIndex,
-  setInnerContent
+  setInnerContent,
+  cloneJSON
 } from "./utils";
 import "./quill.mention.css";
 import "./blots/mention";
@@ -50,14 +51,7 @@ class Mention {
       positioningStrategy: "normal",
       defaultMenuOrientation: "bottom",
       blotName: "mention",
-      dataAttributes: [
-        "id",
-        "value",
-        "denotationChar",
-        "link",
-        "target",
-        "disabled"
-      ],
+      dataAttributes: ["id", "value", "denotationChar", "link", "target", "disabled"],
       linkTarget: "_blank",
       onOpen() {
         return true;
@@ -94,10 +88,8 @@ class Mention {
     this.mentionContainer.className = this.options.mentionContainerClass
       ? this.options.mentionContainerClass
       : "";
-    this.mentionContainer.style.cssText =
-      "display: none; position: absolute;";
-    this.mentionContainer.onmousemove =
-      this.onContainerMouseMove.bind(this);
+    this.mentionContainer.style.cssText = "display: none; position: absolute;";
+    this.mentionContainer.onmousemove = this.onContainerMouseMove.bind(this);
 
     if (this.options.fixMentionsToQuill) {
       this.mentionContainer.style.width = "auto";
@@ -605,7 +597,8 @@ class Mention {
     this.mentionContainer.style.position = "fixed";
     this.mentionContainer.style.height = null;
 
-    const containerPos = this.quill.container.getBoundingClientRect();
+    const containerPos = cloneJSON(this.quill.container.getBoundingClientRect());
+    containerPos.top += window.scrollY;
     const mentionCharPos = this.quill.getBounds(this.mentionCharPos);
     const mentionCharPosAbsolute = {
       left: containerPos.left + mentionCharPos.left,
