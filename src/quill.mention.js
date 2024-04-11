@@ -389,7 +389,7 @@ class Mention {
       this.removeLoading();
 
       this.values = data;
-      this.mentionList.innerText = "";
+      this.mentionList.innerHTML = "";
 
       var initialSelection = -1;
 

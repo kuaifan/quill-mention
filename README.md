@@ -88,7 +88,7 @@ const quill = new Quill("#editor", {
 ### Hover and Click Example
 ```javascript
   window.addEventListener('mention-hovered', (event) => {console.log('hovered: ', event)}, false);
-  window.addEventListener('mention-clicked', (event) => {console.log('hovered: ', event)}, false);
+window.addEventListener('mention-clicked', (event) => {console.log('hovered: ', event)}, false);
 ```
 
 ### Async example
@@ -239,3 +239,11 @@ See also the list of [contributors](https://github.com/quill-mention/quill-menti
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+
+## 发布 npm 包
+
+```shell
+yarn build
+yarn publish
+```

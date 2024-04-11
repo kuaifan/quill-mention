@@ -271,7 +271,7 @@ function attachDataValues(element, data, dataAttributes) {
 }
 function setInnerContent(element, value) {
   if (value === null) return;
-  if (_typeof(value) === "object") element.appendChild(value);else element.innerText = value;
+  if (_typeof(value) === "object") element.appendChild(value);else element.innerHTML = value;
 }
 function getMentionCharIndex(text, mentionDenotationChars, isolateChar, allowInlineMentionChar) {
   return mentionDenotationChars.reduce(function (prev, mentionChar) {
@@ -805,7 +805,7 @@ var Mention = /*#__PURE__*/function () {
       if (data && data.length > 0) {
         this.removeLoading();
         this.values = data;
-        this.mentionList.innerText = "";
+        this.mentionList.innerHTML = "";
         var initialSelection = -1;
         for (var i = 0; i < data.length; i += 1) {
           var li = document.createElement("li");

@@ -13,7 +13,7 @@ function attachDataValues(element, data, dataAttributes) {
 function setInnerContent (element, value) {
   if (value === null) return;
   if (typeof value === "object") element.appendChild(value);
-  else element.innerText = value;
+  else element.innerHTML = value;
 }
 
 function getMentionCharIndex(text, mentionDenotationChars, isolateChar, allowInlineMentionChar) {
