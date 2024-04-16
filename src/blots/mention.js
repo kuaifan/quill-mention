@@ -1,4 +1,4 @@
-import Quill from "quill";
+import Quill from "quill-hitosea";
 
 const Embed = Quill.import("blots/embed");
 

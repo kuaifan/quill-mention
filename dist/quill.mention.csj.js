@@ -1,6 +1,6 @@
 'use strict';
 
-var Quill = require('quill');
+var Quill = require('quill-hitosea');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
