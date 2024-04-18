@@ -244,6 +244,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 发布 npm 包
 
 ```shell
+# 实测环境：nodejs 20
 yarn build
 yarn publish
 ```

@@ -1,4 +1,4 @@
-import Quill from "quill-hitosea";
+import Quill from "quill-hi";
 import Keys from "./constants";
 import {
   attachDataValues,

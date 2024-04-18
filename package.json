@@ -1,6 +1,6 @@
 {
-  "name": "quill-mention-hitosea",
-  "version": "4.0.0-6",
+  "name": "quill-mention-hi",
+  "version": "4.0.0-7",
   "description": "@mentions for the Quill rich text editor",
   "homepage": "https://quill-mention.com/",
   "main": "dist/quill.mention.csj.js",
@@ -14,7 +14,7 @@
     "README.md"
   ],
   "dependencies": {
-    "quill-hitosea": "^2.0.0-rc.5.1"
+    "quill-hi": "^2.0.0"
   },
   "devDependencies": {
     "@ava/babel": "^2.0.0",

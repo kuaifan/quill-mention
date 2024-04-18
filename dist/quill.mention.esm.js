@@ -1,4 +1,4 @@
-import Quill from 'quill-hitosea';
+import Quill from 'quill-hi';
 
 function ownKeys(e, r) {
   var t = Object.keys(e);
