@@ -1,5 +1,16 @@
 import Quill from 'quill-hi';
 
+function _callSuper(t, o, e) {
+  return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e));
+}
+function _isNativeReflectConstruct() {
+  try {
+    var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+  } catch (t) {}
+  return (_isNativeReflectConstruct = function () {
+    return !!t;
+  })();
+}
 function ownKeys(e, r) {
   var t = Object.keys(e);
   if (Object.getOwnPropertySymbols) {
@@ -20,6 +31,20 @@ function _objectSpread2(e) {
     });
   }
   return e;
+}
+function _toPrimitive(t, r) {
+  if ("object" != typeof t || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r || "default");
+    if ("object" != typeof i) return i;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return ("string" === r ? String : Number)(t);
+}
+function _toPropertyKey(t) {
+  var i = _toPrimitive(t, "string");
+  return "symbol" == typeof i ? i : i + "";
 }
 function _typeof(o) {
   "@babel/helpers - typeof";
@@ -109,17 +134,6 @@ function _setPrototypeOf(o, p) {
   };
   return _setPrototypeOf(o, p);
 }
-function _isNativeReflectConstruct() {
-  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-  if (Reflect.construct.sham) return false;
-  if (typeof Proxy === "function") return true;
-  try {
-    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
 function _assertThisInitialized(self) {
   if (self === void 0) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -133,20 +147,6 @@ function _possibleConstructorReturn(self, call) {
     throw new TypeError("Derived constructors may only return object or undefined");
   }
   return _assertThisInitialized(self);
-}
-function _createSuper(Derived) {
-  var hasNativeReflectConstruct = _isNativeReflectConstruct();
-  return function _createSuperInternal() {
-    var Super = _getPrototypeOf(Derived),
-      result;
-    if (hasNativeReflectConstruct) {
-      var NewTarget = _getPrototypeOf(this).constructor;
-      result = Reflect.construct(Super, arguments, NewTarget);
-    } else {
-      result = Super.apply(this, arguments);
-    }
-    return _possibleConstructorReturn(this, result);
-  };
 }
 function _superPropBase(object, property) {
   while (!Object.prototype.hasOwnProperty.call(object, property)) {
@@ -235,20 +235,6 @@ function _createForOfIteratorHelper(o, allowArrayLike) {
     }
   };
 }
-function _toPrimitive(input, hint) {
-  if (typeof input !== "object" || input === null) return input;
-  var prim = input[Symbol.toPrimitive];
-  if (prim !== undefined) {
-    var res = prim.call(input, hint || "default");
-    if (typeof res !== "object") return res;
-    throw new TypeError("@@toPrimitive must return a primitive value.");
-  }
-  return (hint === "string" ? String : Number)(input);
-}
-function _toPropertyKey(arg) {
-  var key = _toPrimitive(arg, "string");
-  return typeof key === "symbol" ? key : String(key);
-}
 
 var Keys = {
   TAB: 'Tab',
@@ -326,20 +312,19 @@ function cloneJSON(myObj) {
 
 var Embed = Quill["import"]("blots/embed");
 var MentionBlot = /*#__PURE__*/function (_Embed) {
-  _inherits(MentionBlot, _Embed);
-  var _super = _createSuper(MentionBlot);
   function MentionBlot(scroll, node) {
     var _this;
     _classCallCheck(this, MentionBlot);
-    _this = _super.call(this, scroll, node);
-    _defineProperty(_assertThisInitialized(_this), "hoverHandler", void 0);
-    _defineProperty(_assertThisInitialized(_this), "hoverHandler", void 0);
+    _this = _callSuper(this, MentionBlot, [scroll, node]);
+    _defineProperty(_this, "hoverHandler", void 0);
+    _defineProperty(_this, "hoverHandler", void 0);
     _this.clickHandler = null;
     _this.hoverHandler = null;
     _this.mounted = false;
     return _this;
   }
-  _createClass(MentionBlot, [{
+  _inherits(MentionBlot, _Embed);
+  return _createClass(MentionBlot, [{
     key: "update",
     value: function update(mutations, context) {
       var _this2 = this;
@@ -474,7 +459,6 @@ var MentionBlot = /*#__PURE__*/function (_Embed) {
       return ua.match(/Chrome/i) + '' === 'chrome';
     }
   }]);
-  return MentionBlot;
 }(Embed);
 MentionBlot.blotName = "mention";
 MentionBlot.tagName = "span";
@@ -593,7 +577,7 @@ var Mention = /*#__PURE__*/function () {
       key: Keys.DOWN
     }, this.downHandler.bind(this));
   }
-  _createClass(Mention, [{
+  return _createClass(Mention, [{
     key: "selectHandler",
     value: function selectHandler() {
       if (this.isOpen && !this.existingSourceExecutionToken) {
@@ -1121,7 +1105,6 @@ var Mention = /*#__PURE__*/function () {
       this.quill.focus();
     }
   }]);
-  return Mention;
 }();
 Quill.register("modules/mention", Mention);
 
