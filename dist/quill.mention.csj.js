@@ -499,7 +499,7 @@ var Mention = /*#__PURE__*/function () {
       onSelect: function onSelect(item, insertItem) {
         insertItem(item);
       },
-      mentionDenotationChars: ["@"],
+      mentionDenotationChars: ['@'],
       showDenotationChar: true,
       allowedChars: /^[a-zA-Z0-9_]*$/,
       minChars: 0,
@@ -509,11 +509,11 @@ var Mention = /*#__PURE__*/function () {
       isolateCharacter: false,
       allowInlineMentionChar: false,
       fixMentionsToQuill: false,
-      positioningStrategy: "normal",
-      defaultMenuOrientation: "bottom",
-      blotName: "mention",
-      dataAttributes: ["id", "value", "denotationChar", "link", "target", "disabled"],
-      linkTarget: "_blank",
+      positioningStrategy: 'normal',
+      defaultMenuOrientation: 'bottom',
+      blotName: 'mention',
+      dataAttributes: ['id', 'value', 'denotationChar', 'link', 'target', 'disabled'],
+      linkTarget: '_blank',
       onOpen: function onOpen() {
         return true;
       },
@@ -524,9 +524,9 @@ var Mention = /*#__PURE__*/function () {
         return true;
       },
       // Style options
-      listItemClass: "ql-mention-list-item",
-      mentionContainerClass: "ql-mention-list-container",
-      mentionListClass: "ql-mention-list",
+      listItemClass: 'ql-mention-list-item',
+      mentionContainerClass: 'ql-mention-list-container',
+      mentionListClass: 'ql-mention-list',
       spaceAfterInsert: true,
       selectKeys: [Keys.ENTER]
     };
@@ -536,30 +536,30 @@ var Mention = /*#__PURE__*/function () {
 
     //Bind all option-functions so they have a reasonable context
     for (var o in this.options) {
-      if (typeof this.options[o] === "function") {
+      if (typeof this.options[o] === 'function') {
         this.options[o] = this.options[o].bind(this);
       }
     }
 
     //create mention container
-    this.mentionContainer = document.createElement("div");
-    this.mentionContainer.className = this.options.mentionContainerClass ? this.options.mentionContainerClass : "";
-    this.mentionContainer.style.cssText = "display: none; position: absolute;";
+    this.mentionContainer = document.createElement('div');
+    this.mentionContainer.className = this.options.mentionContainerClass ? this.options.mentionContainerClass : '';
+    this.mentionContainer.style.cssText = 'display: none; position: absolute;';
     this.mentionContainer.onmousemove = this.onContainerMouseMove.bind(this);
     if (this.options.fixMentionsToQuill) {
-      this.mentionContainer.style.width = "auto";
+      this.mentionContainer.style.width = 'auto';
     }
-    this.mentionList = document.createElement("ul");
-    this.mentionList.id = "quill-mention-list";
-    quill.root.setAttribute("aria-owns", "quill-mention-list");
-    this.mentionList.className = this.options.mentionListClass ? this.options.mentionListClass : "";
+    this.mentionList = document.createElement('ul');
+    this.mentionList.id = 'quill-mention-list';
+    quill.root.setAttribute('aria-owns', 'quill-mention-list');
+    this.mentionList.className = this.options.mentionListClass ? this.options.mentionListClass : '';
     this.mentionContainer.appendChild(this.mentionList);
-    quill.on("text-change", this.onTextChange.bind(this));
-    quill.on("selection-change", this.onSelectionChange.bind(this));
+    quill.on('text-change', this.onTextChange.bind(this));
+    quill.on('selection-change', this.onSelectionChange.bind(this));
 
     //Pasting doesn't fire selection-change after the pasted text is
     //inserted, so here we manually trigger one
-    quill.container.addEventListener("paste", function () {
+    quill.container.addEventListener('paste', function () {
       setTimeout(function () {
         var range = quill.getSelection();
         _this.onSelectionChange(range);
@@ -625,13 +625,13 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "showMentionList",
     value: function showMentionList() {
-      if (this.options.positioningStrategy === "fixed") {
+      if (this.options.positioningStrategy === 'fixed') {
         document.body.appendChild(this.mentionContainer);
       } else {
         this.quill.container.appendChild(this.mentionContainer);
       }
-      this.mentionContainer.style.visibility = "hidden";
-      this.mentionContainer.style.display = "";
+      this.mentionContainer.style.visibility = 'hidden';
+      this.mentionContainer.style.display = '';
       this.mentionContainer.scrollTop = 0;
       this.setMentionContainerPosition();
       this.setIsOpen(true);
@@ -640,23 +640,23 @@ var Mention = /*#__PURE__*/function () {
     key: "hideMentionList",
     value: function hideMentionList() {
       this.options.onBeforeClose();
-      this.mentionContainer.style.display = "none";
+      this.mentionContainer.style.display = 'none';
       this.mentionContainer.remove();
       this.setIsOpen(false);
-      this.quill.root.removeAttribute("aria-activedescendant");
+      this.quill.root.removeAttribute('aria-activedescendant');
     }
   }, {
     key: "highlightItem",
     value: function highlightItem() {
       var scrollItemInView = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       for (var i = 0; i < this.mentionList.childNodes.length; i += 1) {
-        this.mentionList.childNodes[i].classList.remove("selected");
+        this.mentionList.childNodes[i].classList.remove('selected');
       }
-      if (this.itemIndex === -1 || this.mentionList.childNodes[this.itemIndex].dataset.disabled === "true") {
+      if (this.itemIndex === -1 || this.mentionList.childNodes[this.itemIndex].dataset.disabled === 'true') {
         return;
       }
-      this.mentionList.childNodes[this.itemIndex].classList.add("selected");
-      this.quill.root.setAttribute("aria-activedescendant", this.mentionList.childNodes[this.itemIndex].id);
+      this.mentionList.childNodes[this.itemIndex].classList.add('selected');
+      this.quill.root.setAttribute('aria-activedescendant', this.mentionList.childNodes[this.itemIndex].id);
       if (scrollItemInView) {
         var itemHeight = this.mentionList.childNodes[this.itemIndex].offsetHeight;
         var itemPos = this.mentionList.childNodes[this.itemIndex].offsetTop;
@@ -704,7 +704,7 @@ var Mention = /*#__PURE__*/function () {
       }
       var options = _objectSpread2(_objectSpread2({}, this.options), overriddenOptions);
       if (!options.showDenotationChar) {
-        render.denotationChar = "";
+        render.denotationChar = '';
       }
       var insertAtPos;
       if (!programmaticInsert) {
@@ -715,7 +715,7 @@ var Mention = /*#__PURE__*/function () {
       }
       var delta = this.quill.insertEmbed(insertAtPos, options.blotName, render, Quill__default["default"].sources.USER);
       if (options.spaceAfterInsert) {
-        this.quill.insertText(insertAtPos + 1, " ", Quill__default["default"].sources.USER);
+        this.quill.insertText(insertAtPos + 1, ' ', Quill__default["default"].sources.USER);
         // setSelection here sets cursor position
         this.quill.setSelection(insertAtPos + 2, Quill__default["default"].sources.USER);
       } else {
@@ -770,13 +770,13 @@ var Mention = /*#__PURE__*/function () {
       if (!renderedLoading) {
         return;
       }
-      if (this.mentionContainer.getElementsByClassName("ql-mention-loading").length > 0) {
+      if (this.mentionContainer.getElementsByClassName('ql-mention-loading').length > 0) {
         this.showMentionList();
         return;
       }
-      this.mentionList.innerHTML = "";
-      var loadingDiv = document.createElement("div");
-      loadingDiv.className = "ql-mention-loading";
+      this.mentionList.innerHTML = '';
+      var loadingDiv = document.createElement('div');
+      loadingDiv.className = 'ql-mention-loading';
       setInnerContent(loadingDiv, this.options.renderLoading());
       this.mentionContainer.append(loadingDiv);
       this.showMentionList();
@@ -784,7 +784,7 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "removeLoading",
     value: function removeLoading() {
-      var loadingDiv = this.mentionContainer.getElementsByClassName("ql-mention-loading");
+      var loadingDiv = this.mentionContainer.getElementsByClassName('ql-mention-loading');
       if (loadingDiv.length > 0) {
         loadingDiv[0].remove();
       }
@@ -795,15 +795,18 @@ var Mention = /*#__PURE__*/function () {
       if (data && data.length > 0) {
         this.removeLoading();
         this.values = data;
-        this.mentionList.innerHTML = "";
+        this.mentionList.innerHTML = '';
         var initialSelection = -1;
         for (var i = 0; i < data.length; i += 1) {
-          var li = document.createElement("li");
-          li.id = "quill-mention-item-" + i;
-          li.className = this.options.listItemClass ? this.options.listItemClass : "";
+          var li = document.createElement('li');
+          li.id = 'quill-mention-item-' + i;
+          li.className = this.options.listItemClass ? this.options.listItemClass : '';
+          if (data[i].className) {
+            li.className += ' ' + data[i].className;
+          }
           if (data[i].disabled) {
-            li.className += " disabled";
-            li.setAttribute("aria-hidden", "true");
+            li.className += ' disabled';
+            li.setAttribute('aria-hidden', 'true');
           } else if (initialSelection === -1) initialSelection = i;
           li.dataset.index = i;
           var renderedItem = this.options.renderItem(data[i], searchTerm);
@@ -829,7 +832,7 @@ var Mention = /*#__PURE__*/function () {
       do {
         increment++;
         newIndex = (this.itemIndex + increment) % this.values.length;
-        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === "true";
+        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === 'true';
         if (increment === this.values.length + 1) {
           //we've wrapped around w/o finding an enabled item
           newIndex = -1;
@@ -848,7 +851,7 @@ var Mention = /*#__PURE__*/function () {
       do {
         decrement++;
         newIndex = (this.itemIndex + this.values.length - decrement) % this.values.length;
-        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === "true";
+        var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === 'true';
         if (decrement === this.values.length + 1) {
           //we've wrapped around w/o finding an enabled item
           newIndex = -1;
@@ -884,7 +887,7 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "setMentionContainerPosition",
     value: function setMentionContainerPosition() {
-      if (this.options.positioningStrategy === "fixed") this.setMentionContainerPosition_Fixed();else this.setMentionContainerPosition_Normal();
+      if (this.options.positioningStrategy === 'fixed') this.setMentionContainerPosition_Fixed();else this.setMentionContainerPosition_Normal();
     }
   }, {
     key: "setMentionContainerPosition_Normal",
@@ -908,7 +911,7 @@ var Mention = /*#__PURE__*/function () {
       }
 
       // handle vertical positioning
-      if (this.options.defaultMenuOrientation === "top") {
+      if (this.options.defaultMenuOrientation === 'top') {
         // Attempt to align the mention container with the top of the quill editor
         if (this.options.fixMentionsToQuill) topPos = -1 * (containerHeight + this.options.offsetTop);else topPos = mentionCharPos.top - (containerHeight + this.options.offsetTop);
 
@@ -936,25 +939,25 @@ var Mention = /*#__PURE__*/function () {
         }
       }
       if (topPos >= 0) {
-        this.options.mentionContainerClass.split(" ").forEach(function (className) {
+        this.options.mentionContainerClass.split(' ').forEach(function (className) {
           _this3.mentionContainer.classList.add("".concat(className, "-bottom"));
           _this3.mentionContainer.classList.remove("".concat(className, "-top"));
         });
       } else {
-        this.options.mentionContainerClass.split(" ").forEach(function (className) {
+        this.options.mentionContainerClass.split(' ').forEach(function (className) {
           _this3.mentionContainer.classList.add("".concat(className, "-top"));
           _this3.mentionContainer.classList.remove("".concat(className, "-bottom"));
         });
       }
       this.mentionContainer.style.top = "".concat(topPos, "px");
       this.mentionContainer.style.left = "".concat(leftPos, "px");
-      this.mentionContainer.style.visibility = "visible";
+      this.mentionContainer.style.visibility = 'visible';
     }
   }, {
     key: "setMentionContainerPosition_Fixed",
     value: function setMentionContainerPosition_Fixed() {
       var _this4 = this;
-      this.mentionContainer.style.position = "fixed";
+      this.mentionContainer.style.position = 'fixed';
       this.mentionContainer.style.height = null;
       var containerPos = cloneJSON(this.quill.container.getBoundingClientRect());
       containerPos.top += window.scrollY;
@@ -988,22 +991,22 @@ var Mention = /*#__PURE__*/function () {
       var fitsBottom = this.mentionContainer.offsetHeight <= availableSpaceBottom;
       var fitsTop = this.mentionContainer.offsetHeight <= availableSpaceTop;
       var placement;
-      if (this.options.defaultMenuOrientation === "top" && fitsTop) {
-        placement = "top";
-      } else if (this.options.defaultMenuOrientation === "bottom" && fitsBottom) {
-        placement = "bottom";
+      if (this.options.defaultMenuOrientation === 'top' && fitsTop) {
+        placement = 'top';
+      } else if (this.options.defaultMenuOrientation === 'bottom' && fitsBottom) {
+        placement = 'bottom';
       } else {
         //it doesnt fit either so put it where there's the most space
-        placement = availableSpaceBottom > availableSpaceTop ? "bottom" : "top";
+        placement = availableSpaceBottom > availableSpaceTop ? 'bottom' : 'top';
       }
-      if (placement === "bottom") {
+      if (placement === 'bottom') {
         topPos = relativeToPos.top + relativeToPos.height;
         if (!fitsBottom) {
           //shrink it to fit
           //3 is a bit of a fudge factor so it doesnt touch the edge of the screen
-          this.mentionContainer.style.height = availableSpaceBottom - 3 + "px";
+          this.mentionContainer.style.height = availableSpaceBottom - 3 + 'px';
         }
-        this.options.mentionContainerClass.split(" ").forEach(function (className) {
+        this.options.mentionContainerClass.split(' ').forEach(function (className) {
           _this4.mentionContainer.classList.add("".concat(className, "-bottom"));
           _this4.mentionContainer.classList.remove("".concat(className, "-top"));
         });
@@ -1012,17 +1015,17 @@ var Mention = /*#__PURE__*/function () {
         if (!fitsTop) {
           //shrink it to fit
           //3 is a bit of a fudge factor so it doesnt touch the edge of the screen
-          this.mentionContainer.style.height = availableSpaceTop - 3 + "px";
+          this.mentionContainer.style.height = availableSpaceTop - 3 + 'px';
           topPos = 3;
         }
-        this.options.mentionContainerClass.split(" ").forEach(function (className) {
+        this.options.mentionContainerClass.split(' ').forEach(function (className) {
           _this4.mentionContainer.classList.add("".concat(className, "-top"));
           _this4.mentionContainer.classList.remove("".concat(className, "-bottom"));
         });
       }
       this.mentionContainer.style.top = "".concat(topPos, "px");
       this.mentionContainer.style.left = "".concat(leftPos, "px");
-      this.mentionContainer.style.visibility = "visible";
+      this.mentionContainer.style.visibility = 'visible';
     }
   }, {
     key: "getTextBeforeCursor",
@@ -1040,7 +1043,7 @@ var Mention = /*#__PURE__*/function () {
       this.cursorPos = range.index;
       var textBeforeCursor = this.getTextBeforeCursor();
       var textOffset = Math.max(0, this.cursorPos - this.options.maxChars);
-      var textPrefix = textOffset ? this.quill.getText(textOffset - 1, textOffset) : "";
+      var textPrefix = textOffset ? this.quill.getText(textOffset - 1, textOffset) : '';
       var _getMentionCharIndex = getMentionCharIndex(textBeforeCursor, this.options.mentionDenotationChars, this.options.isolateCharacter, this.options.allowInlineMentionChar),
         mentionChar = _getMentionCharIndex.mentionChar,
         mentionCharIndex = _getMentionCharIndex.mentionCharIndex;
@@ -1089,7 +1092,7 @@ var Mention = /*#__PURE__*/function () {
   }, {
     key: "onTextChange",
     value: function onTextChange(delta, oldDelta, source) {
-      if (source === "user") {
+      if (source === 'user') {
         setTimeout(this.onSomethingChange.bind(this), 50);
       }
     }
@@ -1112,6 +1115,6 @@ var Mention = /*#__PURE__*/function () {
     }
   }]);
 }();
-Quill__default["default"].register("modules/mention", Mention);
+Quill__default["default"].register('modules/mention', Mention);
 
 module.exports = Mention;
