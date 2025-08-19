@@ -220,20 +220,7 @@ class Mention {
     this.quill.root.setAttribute('aria-activedescendant', this.mentionList.childNodes[this.itemIndex].id);
 
     if (scrollItemInView) {
-      const itemHeight = this.mentionList.childNodes[this.itemIndex]
-        .offsetHeight;
-      const itemPos = this.mentionList.childNodes[this.itemIndex].offsetTop;
-      const containerTop = this.mentionContainer.scrollTop;
-      const containerBottom = containerTop + this.mentionContainer.offsetHeight;
-
-      if (itemPos < containerTop) {
-        // Scroll up if the item is above the top of the container
-        this.mentionContainer.scrollTop = itemPos;
-      } else if (itemPos > containerBottom - itemHeight) {
-        // scroll down if any part of the element is below the bottom of the container
-        this.mentionContainer.scrollTop +=
-          itemPos - containerBottom + itemHeight;
-      }
+      this.mentionList.childNodes[this.itemIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
 

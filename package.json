@@ -1,6 +1,6 @@
 {
   "name": "quill-mention-hi",
-  "version": "3.1.0-4",
+  "version": "3.1.0-5",
   "description": "@mentions for the Quill rich text editor",
   "homepage": "https://quill-mention.com/",
   "main": "dist/quill.mention.csj.js",
